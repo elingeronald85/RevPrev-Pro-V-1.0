@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Crear Cuenta — RevPrev Pro V 1.0</title>
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#0f172a"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+// ═══════════════════════════════════════════════
+//  CREDENCIALES SUPABASE — DEBEN COINCIDIR CON
+//  LAS DE index.html
+// ═══════════════════════════════════════════════
+const SUPABASE_URL = 'https://qkgwzlghftojirdcsiwb.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrZ3d6bGdoZnRvamlyZGNzaXdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2MTU4NjEsImV4cCI6MjA4OTE5MTg2MX0.34427Rc6WURx60aluEHFJLuTHex6FULMOSuQDgPn8W0';
+
+let _sb = null;
+function getSB() {
+  if (_sb) return _sb;
+  if (!window.supabase) return null;
+  try { _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+  }); } catch(e) { return null; }
+  return _sb;
+}
+</script>
+<style>
+  :root {
+    --bg:      #0f172a;
+    --bg2:     #1e293b;
+    --border:  #334155;
+    --text:    #f1f5f9;
+    --text2:   #cbd5e1;
+    --text3:   #64748b;
+    --blue:    #3b82f6;
+    --blue-d:  #1d4ed8;
+    --green:   #10b981;
+    --red-bg:  #3f0505;
+    --red-br:  #7f1d1d;
+    --red-tx:  #fca5a5;
+  }
+
+  *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+
+  html, body {
+    height:100%;
+    font-family:'DM Sans',sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* ── Fondo animado ── */
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 80%, rgba(30,58,95,.35) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 10%, rgba(37,99,235,.18) 0%, transparent 55%);
+    pointer-events:none; z-index:0;
+  }
+
+  /* ── Layout ── */
+  .page {
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    position:relative; z-index:1;
+  }
+
+  /* ── Tarjeta central ── */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px 44px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 24px 64px rgba(0,0,0,.45);
+    animation: fadeUp .4s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(14px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  /* ── Logo / Header ── */
+  .logo-row {
+    display:flex; align-items:center; gap:14px;
+    margin-bottom:32px;
+  }
+  .logo-icon {
+    width:52px; height:52px; flex-shrink:0;
+    background:linear-gradient(135deg,#1d4ed8,#2563eb);
+    border-radius:14px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:26px;
+    box-shadow:0 8px 24px rgba(37,99,235,.3);
+  }
+  .logo-text h1 { font-size:22px; font-weight:800; color:var(--text); }
+  .logo-text h1 span { color:var(--blue); }
+  .logo-text p  { font-size:12px; color:var(--text3); margin-top:3px; }
+
+  /* ── Título sección ── */
+  .section-title { font-size:18px; font-weight:700; color:var(--text); margin-bottom:4px; }
+  .section-sub   { font-size:13px; color:var(--text3); margin-bottom:24px; line-height:1.5; }
+
+  /* ── Inputs ── */
+  .field { margin-bottom:14px; }
+  .lbl   { display:block; font-size:12px; font-weight:600; color:var(--text3);
+           text-transform:uppercase; letter-spacing:.4px; margin-bottom:5px; }
+  .inp {
+    width:100%; padding:11px 14px;
+    background:#0f172a; border:1px solid var(--border);
+    border-radius:9px; color:var(--text);
+    font-size:14px; font-family:inherit;
+    transition: border-color .15s, box-shadow .15s;
+    outline:none;
+  }
+  .inp:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+  }
+  .inp::placeholder { color: var(--text3); }
+  .inp[type="password"] { letter-spacing:.05em; }
+
+  /* Hint debajo del input */
+  .hint { font-size:11px; color:var(--text3); margin-top:4px; }
+
+  /* ── Botón principal ── */
+  .btn-primary {
+    width:100%; padding:13px;
+    background:linear-gradient(135deg,#1d4ed8,#2563eb);
+    border:none; border-radius:10px;
+    color:#fff; font-size:14px; font-weight:700;
+    font-family:inherit; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    transition: opacity .15s, transform .1s;
+    box-shadow: 0 4px 18px rgba(37,99,235,.35);
+    margin-top:20px;
+  }
+  .btn-primary:hover  { opacity:.9; }
+  .btn-primary:active { transform:scale(.98); }
+  .btn-primary:disabled { opacity:.55; cursor:not-allowed; }
+
+  /* Spinner */
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .spinner {
+    width:18px; height:18px; border-radius:50%;
+    border:2.5px solid rgba(255,255,255,.25);
+    border-top-color:#fff;
+    animation:spin .8s linear infinite;
+    display:none;
+  }
+
+  /* ── Alertas ── */
+  .alert { display:none; padding:11px 14px; border-radius:9px; font-size:13px; margin-top:14px; }
+  .alert-err  { background:var(--red-bg); border:1px solid var(--red-br); color:var(--red-tx); }
+  .alert-ok   { background:#052e16; border:1px solid #166534; color:#86efac; }
+  .alert-info { background:#172554; border:1px solid #1e40af; color:#93c5fd; }
+
+  /* ── Divider ── */
+  .divider { display:flex; align-items:center; gap:12px; margin:22px 0; }
+  .divider span { font-size:12px; color:var(--text3); white-space:nowrap; }
+  .divider::before, .divider::after {
+    content:''; flex:1; height:1px; background:var(--border);
+  }
+
+  /* ── Link a login ── */
+  .login-link {
+    text-align:center; font-size:13px; color:var(--text3); margin-top:20px;
+  }
+  .login-link a {
+    color:var(--blue); text-decoration:underline; cursor:pointer;
+    font-weight:600; background:none; border:none; font-family:inherit;
+    font-size:13px;
+  }
+  .login-link a:hover { opacity:.8; }
+
+  /* ── Requisitos contraseña ── */
+  .pwd-reqs {
+    margin-top:8px; padding:10px 12px;
+    background:#0f172a; border:1px solid var(--border);
+    border-radius:8px; display:none;
+  }
+  .pwd-reqs p { font-size:11px; color:var(--text3); margin-bottom:5px; font-weight:600; }
+  .req { font-size:11px; display:flex; align-items:center; gap:6px;
+         color:var(--text3); margin:2px 0; transition:color .2s; }
+  .req.ok { color:#86efac; }
+  .req-dot { width:6px; height:6px; border-radius:50%;
+             background:var(--text3); flex-shrink:0; transition:background .2s; }
+  .req.ok .req-dot { background:#10b981; }
+
+  /* Barra de fortaleza */
+  .strength-bar { display:none; margin-top:6px; height:4px;
+                  background:var(--border); border-radius:2px; overflow:hidden; }
+  .strength-fill { height:100%; width:0; border-radius:2px; transition:width .3s, background .3s; }
+
+  /* ── Responsive ── */
+  @media (max-width:480px) {
+    .card { padding:28px 20px; border-radius:16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="card">
+
+    <!-- Logo -->
+    <div class="logo-row">
+      <div class="logo-icon">✓</div>
+      <div class="logo-text">
+        <h1>RevPrev <span>Pro</span></h1>
+        <p>Sistema de Revisiones Preventivas V 1.0</p>
+      </div>
+    </div>
+
+    <!-- Título -->
+    <p class="section-title">Crear cuenta</p>
+    <p class="section-sub">Completa los datos para registrarte.<br>Tu cuenta debe ser aprobada por el administrador antes de acceder.</p>
+
+    <!-- Nombre (opcional, se guarda como metadata) -->
+    <div class="field">
+      <label class="lbl" for="r-name">Nombre completo</label>
+      <input class="inp" id="r-name" type="text" placeholder="Ej: Juan Carlos Pérez"
+             autocomplete="name" oninput="clearAlerts()"/>
+    </div>
+
+    <!-- Email -->
+    <div class="field">
+      <label class="lbl" for="r-email">Correo electrónico *</label>
+      <input class="inp" id="r-email" type="email" placeholder="usuario@empresa.com"
+             autocomplete="email" autocapitalize="none" spellcheck="false"
+             oninput="clearAlerts()"
+             onkeydown="if(event.key==='Enter')document.getElementById('r-pass').focus()"/>
+    </div>
+
+    <!-- Contraseña -->
+    <div class="field">
+      <label class="lbl" for="r-pass">Contraseña *</label>
+      <input class="inp" id="r-pass" type="password" placeholder="Mínimo 8 caracteres"
+             autocomplete="new-password"
+             oninput="checkPassword(this.value); clearAlerts()"
+             onfocus="document.getElementById('pwd-reqs').style.display='block';
+                      document.getElementById('strength-bar').style.display='block'"
+             onkeydown="if(event.key==='Enter')document.getElementById('r-pass2').focus()"/>
+      <!-- Barra de fortaleza -->
+      <div class="strength-bar" id="strength-bar">
+        <div class="strength-fill" id="strength-fill"></div>
+      </div>
+      <!-- Requisitos -->
+      <div class="pwd-reqs" id="pwd-reqs">
+        <p>La contraseña debe tener:</p>
+        <div class="req" id="req-len"><span class="req-dot"></span> Al menos 8 caracteres</div>
+        <div class="req" id="req-upper"><span class="req-dot"></span> Una letra mayúscula</div>
+        <div class="req" id="req-num"><span class="req-dot"></span> Un número</div>
+      </div>
+    </div>
+
+    <!-- Confirmar contraseña -->
+    <div class="field">
+      <label class="lbl" for="r-pass2">Confirmar contraseña *</label>
+      <input class="inp" id="r-pass2" type="password" placeholder="Repite la contraseña"
+             autocomplete="new-password"
+             oninput="clearAlerts()"
+             onkeydown="if(event.key==='Enter')doRegister()"/>
+    </div>
+
+    <!-- Alertas -->
+    <div class="alert alert-err"  id="r-err"></div>
+    <div class="alert alert-ok"   id="r-ok"></div>
+    <div class="alert alert-info" id="r-info"></div>
+
+    <!-- Botón registro -->
+    <button class="btn-primary" id="r-btn" onclick="doRegister()">
+      <span id="r-btn-txt">Crear cuenta</span>
+      <div class="spinner" id="r-spinner"></div>
+    </button>
+
+    <!-- Divider -->
+    <div class="divider"><span>¿Ya tienes cuenta?</span></div>
+
+    <!-- Link a login -->
+    <div class="login-link">
+      <a onclick="goLogin()">Iniciar sesión →</a>
+    </div>
+
+  </div><!-- /card -->
+</div><!-- /page -->
+
+<script>
+// ── Navegación ──
+function goLogin() {
+  window.location.href = 'index.html';
+}
+
+// ── Limpiar alertas ──
+function clearAlerts(){
+  ['r-err','r-ok','r-info'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){ el.style.display='none'; el.textContent=''; }
+  });
+}
+function showAlert(id, msg){
+  clearAlerts();
+  const el=document.getElementById(id);
+  if(el){ el.textContent=msg; el.style.display='block'; }
+}
+
+// ── Verificar fortaleza contraseña ──
+function checkPassword(val){
+  const reqs = {
+    'req-len':   val.length >= 8,
+    'req-upper': /[A-Z]/.test(val),
+    'req-num':   /[0-9]/.test(val),
+  };
+  let score = 0;
+  Object.entries(reqs).forEach(([id, ok])=>{
+    const el=document.getElementById(id);
+    if(el){ el.classList.toggle('ok', ok); }
+    if(ok) score++;
+  });
+  // Barra de fortaleza
+  const fill=document.getElementById('strength-fill');
+  if(fill){
+    const pct = val.length===0 ? 0 : Math.min(100, score*30 + (val.length>12?10:0));
+    const col = score===0?'#374151': score===1?'#dc2626': score===2?'#f59e0b':'#10b981';
+    fill.style.width = pct+'%';
+    fill.style.background = col;
+  }
+}
+
+// ── Registro principal ──
+async function doRegister(){
+  const name  = document.getElementById('r-name').value.trim();
+  const email = document.getElementById('r-email').value.trim().toLowerCase();
+  const pass  = document.getElementById('r-pass').value;
+  const pass2 = document.getElementById('r-pass2').value;
+  const btn   = document.getElementById('r-btn');
+  const txt   = document.getElementById('r-btn-txt');
+  const spin  = document.getElementById('r-spinner');
+
+  clearAlerts();
+
+  // Validaciones
+  if(!email || !email.includes('@')){
+    showAlert('r-err','⚠️ Escribe un correo electrónico válido.'); return;
+  }
+  if(pass.length < 8){
+    showAlert('r-err','⚠️ La contraseña debe tener al menos 8 caracteres.'); return;
+  }
+  if(pass !== pass2){
+    showAlert('r-err','⚠️ Las contraseñas no coinciden.'); return;
+  }
+
+  const sb = getSB();
+  if(!sb){
+    showAlert('r-err','❌ Error de conexión con el servidor. Verifica las credenciales Supabase.');
+    return;
+  }
+
+  // Loading
+  btn.disabled=true; txt.textContent='Registrando...'; spin.style.display='block';
+
+  try {
+    const { data, error } = await sb.auth.signUp({
+      email,
+      password: pass,
+      options: {
+        data: {
+          name:  name || email.split('@')[0],
+          role:  'inspector',
+          registered_at: new Date().toISOString()
+        }
+      }
+    });
+
+    if(error) throw error;
+
+    // Supabase puede requerir confirmación de email
+    const needsConfirm = !data.session && data.user?.identities?.length > 0;
+    const emailExists  = data.user?.identities?.length === 0;
+
+    if(emailExists){
+      showAlert('r-err','❌ Este correo ya está registrado. Intenta iniciar sesión.');
+    } else if(needsConfirm){
+      showAlert('r-ok',
+        '✅ ¡Cuenta creada! Revisa tu bandeja de entrada y confirma tu correo antes de ingresar.');
+      // Esperar 4 segundos y redirigir al login
+      setTimeout(goLogin, 4000);
+    } else if(data.session){
+      // Registro exitoso + sesión activa (confirmación desactivada)
+      showAlert('r-ok','✅ ¡Cuenta creada exitosamente! Redirigiendo a la aplicación...');
+      setTimeout(()=>{ window.location.href='index.html'; }, 1800);
+    } else {
+      showAlert('r-info','ℹ️ Registro enviado. Espera a que el administrador active tu cuenta.');
+      setTimeout(goLogin, 3500);
+    }
+
+  } catch(err){
+    let msg = '❌ No se pudo crear la cuenta. Inténtalo de nuevo.';
+    const e = err.message || '';
+    if(e.includes('already registered') || e.includes('already been registered'))
+      msg = '❌ Este correo ya está registrado. Intenta iniciar sesión.';
+    else if(e.includes('weak password') || e.includes('Password should'))
+      msg = '⚠️ Contraseña débil: usa al menos 8 caracteres con números y mayúsculas.';
+    else if(e.includes('Invalid email'))
+      msg = '⚠️ El formato del correo no es válido.';
+    else if(e.includes('Network') || e.includes('fetch'))
+      msg = '🌐 Sin conexión. Verifica tu internet e inténtalo de nuevo.';
+    else if(e.includes('Signups not allowed'))
+      msg = '🔒 El registro está desactivado. Contacta al administrador.';
+    showAlert('r-err', msg);
+  } finally {
+    btn.disabled=false; txt.textContent='Crear cuenta'; spin.style.display='none';
+  }
+}
+
+// ── Si ya hay sesión activa, redirigir directo a la app ──
+(async function checkExistingSession(){
+  const sb = getSB();
+  if(!sb) return;
+  try {
+    const { data } = await sb.auth.getSession();
+    if(data?.session?.user){
+      window.location.href = 'index.html';
+    }
+  } catch(e){ /* ignorar */ }
+})();
+</script>
+</body>
+</html>
